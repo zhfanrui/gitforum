@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script type="text/javascript">
+
+        // console.log(axios);
+        // // axios = new axios;
+
+        // // Make a request for a user with a given ID
+        // axios.get('http://google.com')
+        //   .then(function (response) {
+        //     // handle success
+        //     console.log(response);
+        //   })
+        //   .catch(function (error) {
+        //     // handle error
+        //     console.log(error);
+        //   })
+        //   .then(function () {
+        //     // always executed
+        //   });
+    </script>
+</head>
+<body>
+<div id="app">
+    <h1>{{ title }}</h1>
+    <ul>
+        <li v-for="item in items">{{ item.name }}</li>
+    </ul>
+    <
+
+</div>
+<script type="text/javascript">
+
+        var app = new Vue({
+          el: '#app',
+          data: {
+            title: 'Website Name',
+            items: [
+                {name: "Home"},
+                {name: "About"},
+            ]
+          }
+        })
+</script>
+</body>
+</html>
