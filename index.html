@@ -15,13 +15,12 @@
 
 
         json = null
-//         axios.post("").then(response => (json = response.data))
+        // axios.post("").then(response => (json = response.data))
 
 
 
         var json = {
             username: "zhfanrui",
-            token: "cba207cb26e95ab4f99d2280327962d76d052510",
             repo: "gitforum",
             title: 'Forum Name',
             pages: [
@@ -31,8 +30,7 @@
         }
 
         const instance = axios.create({
-            baseURL: 'https://api.github.com/graphql',
-            headers: {'Authorization': 'bearer ' + json.token}
+            baseURL: 'https://api.github.com/'
         });
 
         Vue.component('web-header', {
@@ -42,10 +40,10 @@
         Vue.component('web-list', {
             data() {return { edges: null }},
             props: ["label_name"], //label
-            template: '<div class="list"><ul><li v-for="edge in edges"><a v-bind:href="\'./content.html?number=\' + edge.node.number">{{ edge.node.title }}</a></li></ul></div>',
+            template: '<div class="list"><ul><li v-for="edge in edges"><a v-bind:href="\'./content.html?number=\' + edge.number">{{ edge.title }}</a></li></ul></div>',
             mounted(){
-                instance.post('', {query: "query{repository(owner:\"" + json.username + "\",name:\"" + json.repo + "\"){issues(last:20, labels:" + this.label_name + "){edges{node{title number body labels(first:5){edges{node{name}}}}}}}}" })
-                .then(response => (this.edges = response.data.data.repository.issues.edges))
+                instance.get("/repos/" + json.username + "/" + json.repo + "/issues")
+                .then(response => (this.edges = response.data))
             }
         })
         Vue.component('web-content', {
@@ -53,9 +51,9 @@
             props: ["content_id"],
             template: '<div class="content" v-html="text"></div>',
             mounted(){
-                instance.post('', {query: "query{repository(owner:\"" + json.username + "\",name:\"" + json.repo + "\"){issue(number:" + this.content_id + "){body}}}" })
+                instance.get("/repos/" + json.username + "/" + json.repo + "/issues/" + this.content_id)
                 .then(response => {
-                    axios.post('https://api.github.com/markdown', {text: response.data.data.repository.issue.body, mode: "gfm", context: "github/gollum" }).then(response2 => {this.text = response2.data;})
+                    instance.post('/markdown', {text: response.data.body, mode: "gfm", context: "github/gollum" }).then(response2 => {this.text = response2.data;})
                 })
             }
         })
