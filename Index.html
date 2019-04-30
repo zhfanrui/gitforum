@@ -4,47 +4,68 @@
     <title></title>
     <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script type="text/javascript">
-
-        // console.log(axios);
-        // // axios = new axios;
-
-        // // Make a request for a user with a given ID
-        // axios.get('http://google.com')
-        //   .then(function (response) {
-        //     // handle success
-        //     console.log(response);
-        //   })
-        //   .catch(function (error) {
-        //     // handle error
-        //     console.log(error);
-        //   })
-        //   .then(function () {
-        //     // always executed
-        //   });
-    </script>
 </head>
 <body>
-<div id="app">
-    <h1>{{ title }}</h1>
-    <ul>
-        <li v-for="item in items">{{ item.name }}</li>
-    </ul>
-    <
+    <div id="app">
+        <web-header></web-header>
+        <web-list label_name="null"></web-list>
+        <web-content content_id="1"></web-content>
+    </div>
+    <script type="text/javascript">
 
-</div>
-<script type="text/javascript">
+
+        json = null
+        axios.post("").then(response => (json = response.data))
+
+
+
+        var json = {
+            username: "zhfanrui",
+            token: "cba207cb26e95ab4f99d2280327962d76d052510",
+            repo: "gitforum",
+            title: 'Forum Name',
+            pages: [
+            {name: "Home", link: "/"},
+            {name: "About", link: "/about.html"},
+            ]
+        }
+
+        const instance = axios.create({
+            baseURL: 'https://api.github.com/graphql',
+            headers: {'Authorization': 'bearer ' + json.token}
+        });
+
+        Vue.component('web-header', {
+            data() {return json},
+            template: '<div class="header"><h1>{{ title }}</h1><ul><li v-for="item in pages"><a v-bind:href="item.link">{{ item.name }}</a></li></ul></div>'
+        })
+        Vue.component('web-list', {
+            data() {return { edges: null }},
+            props: ["label_name"], //label
+            template: '<div class="list"><ul><li v-for="edge in edges"><a v-bind:href="\'./content.html?number=\' + edge.node.number">{{ edge.node.title }}</a></li></ul></div>',
+            mounted(){
+                instance.post('', {query: "query{repository(owner:\"" + json.username + "\",name:\"" + json.repo + "\"){issues(last:20, labels:" + this.label_name + "){edges{node{title number body labels(first:5){edges{node{name}}}}}}}}" })
+                .then(response => (this.edges = response.data.data.repository.issues.edges))
+            }
+        })
+        Vue.component('web-content', {
+            data() {return {text: null}},
+            props: ["content_id"],
+            template: '<div class="content" v-html="text"></div>',
+            mounted(){
+                instance.post('', {query: "query{repository(owner:\"" + json.username + "\",name:\"" + json.repo + "\"){issue(number:" + this.content_id + "){body}}}" })
+                .then(response => {
+                    axios.post('https://api.github.com/markdown', {text: response.data.data.repository.issue.body, mode: "gfm", context: "github/gollum" }).then(response2 => {this.text = response2.data;})
+                })
+            }
+        })
+
+
 
         var app = new Vue({
-          el: '#app',
-          data: {
-            title: 'Website Name',
-            items: [
-                {name: "Home"},
-                {name: "About"},
-            ]
-          }
+            el: '#app',
         })
-</script>
+
+    </script>
 </body>
 </html>
